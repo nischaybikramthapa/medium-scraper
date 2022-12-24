@@ -4,13 +4,11 @@ from medium_scraper.driver import WebDriver
 from medium_scraper.commons import *
 from typing import List, Dict
 from medium_scraper.article import ArticleParser
-from dateutil import tz
-
+from medium_scraper import settings
+import requests
 import pandas as pd
 import time
 
-DT_FORMAT = "%Y-%m-%d"
-LOCAL_TZ = tz.gettz("Australia/Melbourne")
 
 class MediumScraper:
 
@@ -18,13 +16,11 @@ class MediumScraper:
         self.logger = init_logger(self.__class__.__name__)
         self.article_tag = article_tag
         self.frequency = getattr(Period, frequency)
-        self.driver = WebDriver().get()
-        self.driver.implicitly_wait(10)
         self.base_url = "https://medium.com/tag"
         self.end_date = datetime.today()
         
-    def _create_url(self):
-        year, month, day = construct_start_date(self.frequency)
+    def _create_url(self, start_date: datetime = None) -> str:
+        year, month, day = construct_start_date(start_date)
         return f"{self.base_url}/{self.article_tag}/archive/{year}/{month}/{day}"
 
 
@@ -44,7 +40,7 @@ class MediumScraper:
         df = pd.concat(data, axis = 0)
         self.logger.info(f"Retrieved {df.shape[0]} articles from {self.article_tag}")
         date_stamp = self.end_date.astimezone(
-            LOCAL_TZ).strftime(DT_FORMAT)
+            settings.LOCAL_TZ).strftime(settings.DT_FORMAT)
         self.logger.info(f"Saving dataframe to medium_{self.article_tag}_{date_stamp}.csv")
         df.to_csv(f"medium_{self.article_tag}_{date_stamp}.csv", index = False)
     
@@ -53,14 +49,13 @@ class MediumScraper:
         all_articles = []
         while start_date <= self.end_date:
             self.logger.info(f"Scraping {self.base_url} for {start_date} ")
-            url = self._create_url()
+            url = self._create_url(start_date)
             self.logger.info(f"Fetching contents from {url}")
-            self.driver.get(url)
-            soup = BeautifulSoup(self.driver.page_source, features='lxml')
+            response = requests.get(url)
+            soup = BeautifulSoup(response.content, features='lxml')
             articles = self._get_articles(soup)
             records = [ ArticleParser(self.frequency).parse(article) for article in articles]
             all_articles.append(self._convert_to_df(records))
             start_date = start_date + timedelta(days=1) # fetch for the next day
-            time.sleep(3) # Take some rest
+            time.sleep(5) # Take some rest
         self._save_to_file(all_articles)
-        self.driver.close()

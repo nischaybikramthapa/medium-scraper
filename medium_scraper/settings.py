@@ -1,3 +1,10 @@
+"""All the default setting go here"""
+
+from dateutil import tz
+
+DT_FORMAT = "%Y-%m-%d"
+LOCAL_TZ = tz.gettz("Australia/Melbourne")
+
 TITLE_ELEMENTS = {
     "h3": [
             "graf graf--h3 graf-after--figure graf--title",
@@ -29,3 +36,4 @@ SUBTITLE_ELEMENTS = {
             ],
     "em": "markup--em markup--p-em"
 }
+

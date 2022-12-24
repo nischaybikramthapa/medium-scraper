@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from typing import List, Union, Tuple, Dict
 from bs4.element import Tag
 from bs4 import NavigableString
+from medium_scraper import settings
 import logging
 import re
 
@@ -14,10 +15,8 @@ class Period(Enum):
     yearly = 365
 
 
-def construct_start_date(days: Period) -> Tuple[str, str, str]:
-    today_dt = (datetime.today() - timedelta(days=days.value)
-                ).strftime("%Y-%m-%d")
-    year, month, day = today_dt.split("-")
+def construct_start_date(start_date: datetime) -> Tuple[str, str, str]:
+    year, month, day = start_date.strftime(settings.DT_FORMAT).split("-")
     return year, month, day
 
 
@@ -25,7 +24,7 @@ def get_start_date(days: Period) -> datetime:
     return datetime.now() - timedelta(days=days.value)
 
 
-def init_logger(name: str):
+def init_logger(name: str) -> logging.Logger:
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s -   %(message)s',
                         datefmt='%m/%d/%Y %H:%M:%S')
     logger = logging.getLogger(name)

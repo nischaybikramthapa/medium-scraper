@@ -1,5 +1,5 @@
 from bs4.element import Tag
-from typing import Union, Dict, Any, List
+from typing import Union, Dict, Any
 from bs4 import BeautifulSoup
 from datetime import datetime
 import requests

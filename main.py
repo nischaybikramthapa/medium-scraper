@@ -1,4 +1,3 @@
-import time
 from medium_scraper.scraper import MediumScraper
 
 

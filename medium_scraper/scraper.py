@@ -1,6 +1,5 @@
 from datetime import datetime, timedelta
 from bs4 import BeautifulSoup, ResultSet
-from medium_scraper.driver import WebDriver
 from medium_scraper.commons import *
 from typing import List, Dict
 from medium_scraper.article import ArticleParser
